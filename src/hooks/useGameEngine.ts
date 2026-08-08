@@ -4,8 +4,8 @@ import { BirdState, GameStatus, Obstacle, Particle } from "@/lib/types";
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 600;
 const GROUND_HEIGHT = 65;
-const GRAVITY = 0.25;
-const JUMP_FORCE = -6.0;
+const GRAVITY = 0.20;
+const JUMP_FORCE = -5.5;
 const OBSTACLE_SPEED = 3.2;
 const OBSTACLE_SPAWN_INTERVAL = 95; // frames
 const GAP_SIZE = 150;
@@ -45,6 +45,7 @@ export function useGameEngine(canvasRef: React.RefObject<HTMLCanvasElement>) {
   const particlesRef = useRef<Particle[]>([]);
   const cloudsRef = useRef<{ x: number; y: number; scale: number; speed: number }[]>([]);
   const frameCountRef = useRef(0);
+  const birdImageRef = useRef<HTMLImageElement | null>(null);
 
   // Load saved high score
   useEffect(() => {
@@ -58,8 +59,16 @@ export function useGameEngine(canvasRef: React.RefObject<HTMLCanvasElement>) {
     }
   }, []);
 
-  // Initialize random pixel clouds
+  // Initialize random pixel clouds and load bird image
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const img = new Image();
+      img.src = "/anush_man.png";
+      img.onload = () => {
+        birdImageRef.current = img;
+      };
+    }
+
     cloudsRef.current = [
       { x: 50, y: 60, scale: 1.3, speed: 0.5 },
       { x: 260, y: 100, scale: 0.9, speed: 0.35 },
@@ -72,7 +81,7 @@ export function useGameEngine(canvasRef: React.RefObject<HTMLCanvasElement>) {
     birdRef.current = {
       x: 120,
       y: 280,
-      velocity: JUMP_FORCE,
+      velocity: 0,
       radius: 18,
       rotation: 0,
     };
@@ -162,6 +171,8 @@ export function useGameEngine(canvasRef: React.RefObject<HTMLCanvasElement>) {
           } else if (status === "PLAYING") {
             // 4. Update Physics if PLAYING
             const bird = birdRef.current;
+            
+            // Standard Flappy Bird gravity
             bird.velocity += GRAVITY;
             
             // Terminal velocity limit (prevents falling too fast)
@@ -172,9 +183,7 @@ export function useGameEngine(canvasRef: React.RefObject<HTMLCanvasElement>) {
             bird.y += bird.velocity;
             
             // Better rotation mechanics
-            // Snappy tilt up when jumping, smooth tilt down when falling
             const targetRotation = Math.min(Math.PI / 2, Math.max(-Math.PI / 6, (bird.velocity * 0.12)));
-            // Smoothly interpolate rotation to target
             bird.rotation += (targetRotation - bird.rotation) * 0.15;
 
             // Ground/Ceiling collision
@@ -336,39 +345,44 @@ export function useGameEngine(canvasRef: React.RefObject<HTMLCanvasElement>) {
           ctx.translate(bx, by);
           ctx.rotate(bird.rotation);
 
-          const isWingUp = Math.floor(frameCountRef.current / 6) % 2 === 0;
-
-          // Yellow Body
-          ctx.fillStyle = "#f8d038";
-          ctx.fillRect(-16, -14, 28, 24);
-
-          // Orange Belly
-          ctx.fillStyle = "#f8a038";
-          ctx.fillRect(-12, 2, 20, 8);
-
-          // Eye
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(2, -12, 10, 10);
-          ctx.fillStyle = "#0f172a";
-          ctx.fillRect(7, -9, 5, 5);
-
-          // Beak
-          ctx.fillStyle = "#f85820";
-          ctx.fillRect(12, -2, 14, 10);
-          ctx.fillRect(12, 3, 10, 5);
-
-          // Wing
-          ctx.fillStyle = "#ffffff";
-          if (isWingUp) {
-            ctx.fillRect(-18, -16, 14, 10);
+          if (birdImageRef.current) {
+            // Draw anush_man.png
+            ctx.drawImage(birdImageRef.current, -24, -24, 48, 48);
           } else {
-            ctx.fillRect(-18, -4, 14, 10);
-          }
+            const isWingUp = Math.floor(frameCountRef.current / 6) % 2 === 0;
 
-          // Black Outline
-          ctx.strokeStyle = "#0f172a";
-          ctx.lineWidth = 3;
-          ctx.strokeRect(-16, -14, 28, 24);
+            // Yellow Body
+            ctx.fillStyle = "#f8d038";
+            ctx.fillRect(-16, -14, 28, 24);
+
+            // Orange Belly
+            ctx.fillStyle = "#f8a038";
+            ctx.fillRect(-12, 2, 20, 8);
+
+            // Eye
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(2, -12, 10, 10);
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(7, -9, 5, 5);
+
+            // Beak
+            ctx.fillStyle = "#f85820";
+            ctx.fillRect(12, -2, 14, 10);
+            ctx.fillRect(12, 3, 10, 5);
+
+            // Wing
+            ctx.fillStyle = "#ffffff";
+            if (isWingUp) {
+              ctx.fillRect(-18, -16, 14, 10);
+            } else {
+              ctx.fillRect(-18, -4, 14, 10);
+            }
+
+            // Black Outline
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-16, -14, 28, 24);
+          }
 
           ctx.restore();
 

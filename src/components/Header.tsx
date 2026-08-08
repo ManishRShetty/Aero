@@ -29,16 +29,8 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="w-full bg-white border-b-4 border-slate-900 px-4 md:px-6 py-3 flex flex-wrap items-center justify-between gap-3 z-50 shadow-[0_4px_0_0_#0f172a]">
       {/* Brand Title */}
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-amber-400 border-3 border-slate-900 shadow-[3px_3px_0_0_#0f172a] text-slate-950">
-          <Gamepad2 className="w-6 h-6 animate-pulse" />
-        </div>
-        <div>
-          <h1 className="text-xs md:text-sm font-pixel font-black tracking-wider text-slate-900 uppercase">
-            FLAPPY AI // 8-BIT EDITION
-          </h1>
-          <p className="text-[10px] font-arcade text-sky-700 font-bold uppercase tracking-wider">
-            MANUAL & AI EXPRESSION CONTROLLED
-          </p>
+        <div className="p-1 rounded-xl bg-amber-400 border-3 border-slate-900 shadow-[3px_3px_0_0_#0f172a] flex items-center justify-center">
+          <img src="/aero_logo.png" alt="Aero Logo" className="w-8 h-8 object-contain" />
         </div>
       </div>
 
