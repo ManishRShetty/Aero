@@ -1,9 +1,10 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import { GameStatus, ActionType, ControlMode } from "@/lib/types";
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from "@/hooks/useGameEngine";
 import { Play, RotateCcw, Smile, Space, ShieldAlert, Trophy, Sparkles, MousePointer } from "lucide-react";
 
 interface GameCanvasProps {
+  canvasRef: React.RefObject<HTMLCanvasElement>;
   gameStatus: GameStatus;
   score: number;
   highScore: number;
@@ -17,6 +18,7 @@ interface GameCanvasProps {
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
+  canvasRef,
   gameStatus,
   score,
   highScore,
@@ -28,9 +30,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   onResetGame,
   onManualJump,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
   // Keyboard controls listener (Spacebar, Up Arrow, W key)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -47,10 +46,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const isJumpActive = lastAction === "JUMP" || Date.now() - lastJumpTime < 300;
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full flex flex-col relative rounded-2xl bg-white border-3.5 border-slate-900 overflow-hidden shadow-[6px_6px_0_0_#0f172a] min-h-[520px] lg:min-h-[620px] flex-1"
-    >
+    <div className="w-full flex flex-col relative rounded-2xl bg-white border-3.5 border-slate-900 overflow-hidden shadow-[6px_6px_0_0_#0f172a] min-h-[520px] lg:min-h-[620px] flex-1">
       {/* Top HUD Overlay */}
       <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
         {/* Control Mode Badge */}
@@ -91,7 +87,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         </div>
       </div>
 
-      {/* HTML5 Canvas Element with Fixed 800x600 Internal Buffer */}
+      {/* HTML5 Canvas Element Attached to Shared CanvasRef */}
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
@@ -103,7 +99,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       {/* START Screen Overlay */}
       {gameStatus === "START" && (
         <div
-          className="absolute inset-0 z-30 bg-sky-900/35 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center cursor-pointer"
+          className="absolute inset-0 z-30 bg-sky-900/25 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center cursor-pointer"
           onClick={onManualJump}
         >
           <div className="w-14 h-14 rounded-2xl bg-amber-300 border-3.5 border-slate-900 shadow-[4px_4px_0_0_#0f172a] flex items-center justify-center text-slate-950 mb-3 animate-bounce">
@@ -137,7 +133,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       {/* GAME OVER Screen Overlay */}
       {gameStatus === "GAME_OVER" && (
         <div
-          className="absolute inset-0 z-30 bg-rose-950/45 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center cursor-pointer"
+          className="absolute inset-0 z-30 bg-rose-950/40 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center cursor-pointer"
           onClick={onManualJump}
         >
           <div className="w-14 h-14 rounded-2xl bg-rose-400 border-3.5 border-slate-900 shadow-[4px_4px_0_0_#0f172a] flex items-center justify-center text-slate-950 mb-3">

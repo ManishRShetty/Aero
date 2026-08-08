@@ -86,6 +86,7 @@ export default function Home() {
             }`}
           >
             <GameCanvas
+              canvasRef={canvasRef}
               gameStatus={gameStatus}
               score={score}
               highScore={highScore}
