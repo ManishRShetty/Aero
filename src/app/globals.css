@@ -3,49 +3,92 @@
 @tailwind utilities;
 
 :root {
-  --background: #06090e;
-  --foreground: #f8fafc;
+  --background: #e0f2fe;
+  --foreground: #0f172a;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-pixel), monospace;
   overflow-x: hidden;
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 70%),
-    radial-gradient(circle at 100% 100%, rgba(157, 0, 255, 0.06) 0%, transparent 60%);
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.8) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(125, 211, 252, 0.4) 0%, transparent 50%);
   background-attachment: fixed;
 }
 
-/* Custom Cyber Scrollbar */
+/* Retro Pixel Font Helper Utility */
+.font-pixel {
+  font-family: var(--font-pixel), cursive, monospace;
+}
+
+.font-arcade {
+  font-family: var(--font-arcade), monospace;
+}
+
+/* Retro Pixel Card Styling */
+.pixel-card {
+  background-color: #ffffff;
+  border: 3.5px solid #0f172a;
+  box-shadow: 5px 5px 0px 0px #0f172a;
+  border-radius: 12px;
+}
+
+.pixel-card-yellow {
+  background-color: #fef08a;
+  border: 3.5px solid #0f172a;
+  box-shadow: 4px 4px 0px 0px #0f172a;
+}
+
+.pixel-card-cyan {
+  background-color: #bae6fd;
+  border: 3.5px solid #0f172a;
+  box-shadow: 4px 4px 0px 0px #0f172a;
+}
+
+.pixel-button {
+  background-color: #fbbf24;
+  color: #0f172a;
+  border: 3px solid #0f172a;
+  box-shadow: 3px 3px 0px 0px #0f172a;
+  transition: all 0.1s ease;
+  font-family: var(--font-pixel);
+}
+
+.pixel-button:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px 0px #0f172a;
+  background-color: #f59e0b;
+}
+
+.pixel-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px 0px #0f172a;
+}
+
+/* Custom Pixel Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0d14;
+  background: #bae6fd;
+  border-left: 2px solid #0f172a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #38bdf8;
+  border: 2px solid #0f172a;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00f0ff;
+  background: #0284c7;
 }
 
-@keyframes spinSlow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spinSlow 12s linear infinite;
+canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }

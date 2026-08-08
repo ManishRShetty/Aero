@@ -1,4 +1,5 @@
 export type ActionType = "JUMP" | "NONE";
+export type ControlMode = "HYBRID" | "MANUAL_ONLY" | "AI_ONLY";
 
 export interface PredictRequest {
   image_base64: string;
@@ -34,6 +35,7 @@ export interface GameSettings {
   confidenceThreshold: number;
   frameIntervalMs: number;
   mockMode: boolean;
+  controlMode: ControlMode;
   apiUrl: string;
   keyboardFallback: boolean;
   particleEffects: boolean;

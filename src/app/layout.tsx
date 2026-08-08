@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Press_Start_2P, VT323 } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const pressStart2P = Press_Start_2P({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-pixel",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const vt323 = VT323({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-arcade",
 });
 
 export const metadata: Metadata = {
-  title: "Aero // Face-Controlled Flappy Bird",
-  description: "Real-time AI facial expression controlled Flappy Bird powered by ResNet18 FER-2013 deep learning inference.",
+  title: "AERO // Pixel Face-Controlled Flappy Bird",
+  description: "Light mode 8-bit retro pixel art face-controlled Flappy Bird powered by ResNet18 AI expression inference.",
 };
 
 export default function RootLayout({
@@ -23,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen flex flex-col bg-cyber-dark text-slate-100 selection:bg-cyber-neon selection:text-slate-950">
+    <html lang="en" className={`${pressStart2P.variable} ${vt323.variable}`}>
+      <body className="min-h-screen flex flex-col bg-sky-100 text-slate-900 font-pixel selection:bg-yellow-300 selection:text-slate-950">
         {children}
       </body>
     </html>
