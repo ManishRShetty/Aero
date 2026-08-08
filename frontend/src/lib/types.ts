@@ -10,6 +10,7 @@ export interface PredictResponse {
   action: ActionType;
   confidence: number;
   processing_time_ms: number;
+  probabilities?: SoftmaxProbabilities;
 }
 
 export interface SoftmaxProbabilities {

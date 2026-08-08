@@ -57,11 +57,19 @@ export class InferenceService {
 
       const data: PredictResponse = await res.json();
       
-      // Calculate softmax representation for visual telemetry dashboard
+      // If backend provides actual probabilities, use them. Otherwise fallback to calculating mock ones.
       const isJump = data.action === "JUMP" && data.confidence >= confidenceThreshold;
-      const smileProb = isJump ? data.confidence : Math.max(0.05, 1 - data.confidence);
-      const neutralProb = isJump ? Math.max(0.02, (1 - smileProb) * 0.8) : Math.min(0.92, data.confidence);
-      const surpriseProb = Math.max(0.01, 1 - (smileProb + neutralProb));
+      let smileProb, neutralProb, surpriseProb;
+      
+      if (data.probabilities) {
+        smileProb = data.probabilities.smile;
+        neutralProb = data.probabilities.neutral;
+        surpriseProb = data.probabilities.surprise;
+      } else {
+        smileProb = isJump ? data.confidence : Math.max(0.05, 1 - data.confidence);
+        neutralProb = isJump ? Math.max(0.02, (1 - smileProb) * 0.8) : Math.min(0.92, data.confidence);
+        surpriseProb = Math.max(0.01, 1 - (smileProb + neutralProb));
+      }
 
       return {
         response: {

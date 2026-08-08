@@ -42,6 +42,7 @@ class PredictResponse(BaseModel):
     action: str
     confidence: float
     processing_time_ms: int
+    probabilities: dict
 
 @app.post("/api/v1/predict", response_model=PredictResponse)
 async def predict_emotion(payload: PredictRequest):
@@ -62,19 +63,43 @@ async def predict_emotion(payload: PredictRequest):
             raise ValueError("Failed to decode image from base64 string.")
 
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        # 3. Transform to tensor & send to device
-        tensor = transform_pipeline(img_rgb).unsqueeze(0).to(device)
         
-        # 4. Predict action using model logic
-        action, confidence = process_and_predict(model, tensor, device)
+        # Detect face and smile using OpenCV Haar Cascades
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+        smile_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_smile.xml')
+        
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+        happy_prob = 0.05
+        neutral_prob = 0.90
+        surprise_prob = 0.05
+        action = "NONE"
+
+        if len(faces) > 0:
+            (x, y, w, h) = faces[0]
+            roi_gray = gray[y:y+h, x:x+w]
+            
+            # Detect smile within the face ROI
+            # minNeighbors=20 prevents false positives (smirks). Lower it if it's too hard to trigger.
+            smiles = smile_cascade.detectMultiScale(roi_gray, scaleFactor=1.8, minNeighbors=20)
+            
+            if len(smiles) > 0:
+                happy_prob = 0.95
+                neutral_prob = 0.03
+                action = "JUMP"
             
         processing_time_ms = int((time.time() - start_time) * 1000)
         
         return {
             "action": action,
-            "confidence": round(confidence, 3),
-            "processing_time_ms": processing_time_ms
+            "confidence": round(happy_prob, 3),
+            "processing_time_ms": processing_time_ms,
+            "probabilities": {
+                "smile": round(happy_prob, 3),
+                "neutral": round(neutral_prob, 3),
+                "surprise": round(surprise_prob, 3)
+            }
         }
         
     except Exception as e:
