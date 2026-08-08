@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { AITelemetryState, GameSettings } from "../lib/types";
-import { InferenceService } from "../lib/api";
+import { AITelemetryState, GameSettings } from "@/lib/types";
+import { InferenceService } from "@/lib/api";
 
 export function useWebcamFrame(
   settings: GameSettings,
@@ -24,7 +24,6 @@ export function useWebcamFrame(
     error: null,
   });
 
-  // Track FPS calculation
   const frameTimesRef = useRef<number[]>([]);
 
   // Initialize camera
@@ -69,7 +68,6 @@ export function useWebcamFrame(
     setIsCameraActive(false);
   }, []);
 
-  // Trigger camera startup
   useEffect(() => {
     startCamera();
     return () => {
@@ -82,7 +80,6 @@ export function useWebcamFrame(
     let timerId: NodeJS.Timeout;
     let isProcessing = false;
 
-    // Ensure offscreen 224x224 canvas exists
     if (!offscreenCanvasRef.current) {
       const canvas = document.createElement("canvas");
       canvas.width = 224;
@@ -99,7 +96,6 @@ export function useWebcamFrame(
       try {
         let base64Image = "";
 
-        // If camera is running, draw video frame onto 224x224 canvas
         if (isCameraActive && videoRef.current && offscreenCanvasRef.current) {
           const ctx = offscreenCanvasRef.current.getContext("2d");
           if (ctx) {
@@ -114,7 +110,6 @@ export function useWebcamFrame(
           }
         }
 
-        // Call prediction service (Live FastAPI or Mock)
         const { response, probabilities } = await InferenceService.predict(
           base64Image || "dummy_base64_string",
           settings.apiUrl,
@@ -123,11 +118,9 @@ export function useWebcamFrame(
           manualJumpRequested
         );
 
-        // Calculate end to end latency & FPS
         const endTime = performance.now();
         const roundTripMs = endTime - requestStartTime;
 
-        // Calculate smooth FPS over last 10 frames
         const now = Date.now();
         frameTimesRef.current.push(now);
         frameTimesRef.current = frameTimesRef.current.filter((t) => now - t <= 1000);
@@ -146,7 +139,12 @@ export function useWebcamFrame(
           error: null,
         });
 
-        if (response.action === "JUMP" && onActionReceived) {
+        // Trigger action callback if AI is active and not MANUAL_ONLY
+        if (
+          response.action === "JUMP" &&
+          onActionReceived &&
+          settings.controlMode !== "MANUAL_ONLY"
+        ) {
           onActionReceived("JUMP");
         }
 
@@ -175,6 +173,7 @@ export function useWebcamFrame(
     settings.mockMode,
     settings.confidenceThreshold,
     settings.frameIntervalMs,
+    settings.controlMode,
     manualJumpRequested,
     onActionReceived,
   ]);

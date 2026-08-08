@@ -1,23 +1,23 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from "react";
-import { Header } from "../components/Header";
-import { BentoGrid } from "../components/BentoGrid";
-import { GameCanvas } from "../components/GameCanvas";
-import { TelemetryPanel } from "../components/TelemetryPanel";
-import { AIStatePanel } from "../components/AIStatePanel";
-import { useWebcamFrame } from "../hooks/useWebcamFrame";
-import { useGameEngine } from "../hooks/useGameEngine";
-import { GameSettings } from "../lib/types";
+import { Header } from "@/components/Header";
+import { GameCanvas } from "@/components/GameCanvas";
+import { TelemetryPanel } from "@/components/TelemetryPanel";
+import { AIStatePanel } from "@/components/AIStatePanel";
+import { useWebcamFrame } from "@/hooks/useWebcamFrame";
+import { useGameEngine } from "@/hooks/useGameEngine";
+import { GameSettings } from "@/lib/types";
 
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  // Global Settings state
   const [settings, setSettings] = useState<GameSettings>({
     confidenceThreshold: 0.80,
-    frameIntervalMs: 100, // 100ms interval (10 FPS stream)
-    mockMode: true, // Default to Mock Predictor for instant out-of-box testing
+    frameIntervalMs: 100,
+    mockMode: true,
+    controlMode: "MANUAL_ONLY", // Default to MANUAL_ONLY for instant 100% manual game testability!
     apiUrl: "http://localhost:8000/api/v1/predict",
     keyboardFallback: true,
     particleEffects: true,
@@ -28,7 +28,6 @@ export default function Home() {
     setSettings((prev) => ({ ...prev, ...newSettings }));
   };
 
-  // Initialize Game Canvas Engine
   const {
     gameStatus,
     score,
@@ -39,7 +38,6 @@ export default function Home() {
     triggerJump,
   } = useGameEngine(canvasRef);
 
-  // Callback when AI backend triggers "JUMP"
   const handleActionReceived = useCallback(
     (action: "JUMP" | "NONE") => {
       if (action === "JUMP") {
@@ -49,7 +47,6 @@ export default function Home() {
     [triggerJump]
   );
 
-  // Initialize Webcam Capture & AI Telemetry Hook
   const {
     videoRef,
     isCameraActive,
@@ -59,14 +56,13 @@ export default function Home() {
     triggerManualJump,
   } = useWebcamFrame(settings, handleActionReceived);
 
-  // Combine manual jump trigger with engine jump
   const handleManualJump = () => {
     triggerJump();
     triggerManualJump();
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-cyber-dark">
+    <div className="min-h-screen flex flex-col justify-between bg-sky-100 font-pixel selection:bg-amber-300">
       {/* Header */}
       <Header
         settings={settings}
@@ -76,53 +72,62 @@ export default function Home() {
         isConnected={telemetry.isConnected}
         score={score}
         highScore={highScore}
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
-      {/* Main Bento Grid Workspace */}
-      <main className="flex-1 flex items-center justify-center py-2">
-        <BentoGrid>
-          {/* Main Canvas Game Loop (Left 70% Width / Col 8) */}
-          <GameCanvas
-            gameStatus={gameStatus}
-            score={score}
-            highScore={highScore}
-            lastAction={telemetry.action}
-            lastConfidence={telemetry.confidence}
-            lastJumpTime={lastJumpTime}
-            onStartGame={startGame}
-            onResetGame={resetGame}
-            onManualJump={handleManualJump}
-          />
-
-          {/* Right Column (Col 4) containing Telemetry & AI Panels */}
-          <div className="lg:col-span-4 flex flex-col gap-5 justify-between">
-            {/* Top Right: Telemetry Panel */}
-            <TelemetryPanel
-              videoRef={videoRef}
-              isCameraActive={isCameraActive}
-              onStartCamera={startCamera}
-              onStopCamera={stopCamera}
-              fps={telemetry.fps}
-              frameIntervalMs={settings.frameIntervalMs}
-            />
-
-            {/* Bottom Right: AI State Panel */}
-            <AIStatePanel
-              telemetry={telemetry}
-              settings={settings}
-              onUpdateSettings={handleUpdateSettings}
+      {/* Main Workspace */}
+      <main className="flex-1 max-w-[1700px] w-full mx-auto p-3 md:p-5 flex items-stretch">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          {/* Main 8-Bit Canvas Game Display */}
+          <div
+            className={`transition-all duration-300 flex flex-col ${
+              isSidebarOpen ? "lg:col-span-8" : "lg:col-span-12"
+            }`}
+          >
+            <GameCanvas
+              gameStatus={gameStatus}
+              score={score}
+              highScore={highScore}
+              lastAction={telemetry.action}
+              lastConfidence={telemetry.confidence}
+              lastJumpTime={lastJumpTime}
+              controlMode={settings.controlMode}
+              onStartGame={startGame}
+              onResetGame={resetGame}
+              onManualJump={handleManualJump}
             />
           </div>
-        </BentoGrid>
+
+          {/* Minimizable Right Sidebar (Camera & AI Telemetry) */}
+          {isSidebarOpen && (
+            <div className="lg:col-span-4 flex flex-col gap-5 justify-between animate-fade-in">
+              <TelemetryPanel
+                videoRef={videoRef}
+                isCameraActive={isCameraActive}
+                onStartCamera={startCamera}
+                onStopCamera={stopCamera}
+                fps={telemetry.fps}
+                frameIntervalMs={settings.frameIntervalMs}
+              />
+
+              <AIStatePanel
+                telemetry={telemetry}
+                settings={settings}
+                onUpdateSettings={handleUpdateSettings}
+              />
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-2.5 px-6 border-t border-slate-900 bg-slate-950 text-center text-xs font-mono text-slate-400 flex flex-wrap justify-between items-center gap-2">
-        <div>AERO AI // DEEP LEARNING FACIAL EXPRESSION ENGINE</div>
-        <div className="flex items-center gap-4 text-slate-400">
+      <footer className="w-full py-2 px-6 border-t-3 border-slate-900 bg-white text-center text-[10px] font-pixel text-slate-700 flex flex-wrap justify-between items-center gap-2 shadow-[0_-3px_0_0_#0f172a]">
+        <div>FLAPPY BIRD 8-BIT // PIXEL AI ENGINE</div>
+        <div className="flex items-center gap-3 text-sky-800 font-bold">
           <span>FASTAPI CONTRACT: /api/v1/predict</span>
           <span>•</span>
-          <span>COMPRESSION: 224x224 JPEG @ 0.6</span>
+          <span>224x224 JPEG @ 10 FPS</span>
         </div>
       </footer>
     </div>
