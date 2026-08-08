@@ -16,8 +16,8 @@ export default function Home() {
   const [settings, setSettings] = useState<GameSettings>({
     confidenceThreshold: 0.80,
     frameIntervalMs: 100,
-    mockMode: true,
-    controlMode: "MANUAL_ONLY", // Default to MANUAL_ONLY for instant 100% manual game testability!
+    mockMode: false,
+    controlMode: "HYBRID", // Default to AI HYBRID so smile triggers jump out of the box!
     apiUrl: "http://localhost:8000/api/v1/predict",
     keyboardFallback: true,
     particleEffects: true,

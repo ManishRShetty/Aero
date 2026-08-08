@@ -80,6 +80,16 @@ async def predict_emotion(payload: PredictRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@app.get("/")
+def root():
+    return {
+        "name": "Aero Flappy Bird AI Backend",
+        "status": "online",
+        "device": str(device),
+        "predict_endpoint": "/api/v1/predict",
+        "health_endpoint": "/health"
+    }
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "device": str(device), "model_loaded": True}

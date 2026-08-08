@@ -155,7 +155,9 @@ export function useWebcamFrame(
         setTelemetry((prev) => ({
           ...prev,
           isConnected: false,
-          error: err.message || "Failed to reach inference server",
+          error: settings.mockMode
+            ? err.message || "Mock error"
+            : "FastAPI Backend Offline. Start backend (uvicorn main:app --port 8000) or toggle MOCK.",
         }));
       } finally {
         isProcessing = false;

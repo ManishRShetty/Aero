@@ -5,6 +5,20 @@ export class InferenceService {
   private static mockTickCount = 0;
 
   /**
+   * Ping FastAPI health endpoint
+   */
+  public static async checkHealth(apiUrl: string): Promise<boolean> {
+    try {
+      const baseUrl = apiUrl.replace(/\/api\/v1\/predict\/?$/, "");
+      const healthUrl = `${baseUrl}/health`;
+      const res = await fetch(healthUrl, { method: "GET", signal: AbortSignal.timeout(3000) });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Send frame to live FastAPI backend or run mock prediction
    */
   public static async predict(
