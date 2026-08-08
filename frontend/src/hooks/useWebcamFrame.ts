@@ -117,6 +117,8 @@ export function useWebcamFrame(
           settings.confidenceThreshold,
           manualJumpRequested
         );
+        
+        console.log("Inference Result:", { response, probabilities, manualJumpRequested });
 
         const endTime = performance.now();
         const roundTripMs = endTime - requestStartTime;
